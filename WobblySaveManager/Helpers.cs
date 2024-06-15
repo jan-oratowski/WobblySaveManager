@@ -23,18 +23,25 @@ namespace WobblySaveManager
         public static List<Save> GetArchives(string savePath) =>
             Directory.GetFiles(Path.Combine(savePath)).Select(file => new Save(file, "archive")).ToList();
 
-        public static void ArchiveCurrent(string savePath)
+        public static void ArchiveCurrent(string savePath, string basePath)
         {
-            var archivePath = Path.Combine(Directory.GetParent(savePath)!.Name, "Archive");
+            var archivePath = Path.Combine(basePath, "Archive");
             if (!Directory.Exists(archivePath))
             {
                 Directory.CreateDirectory(archivePath);
             }
             
             var archiveFile = Path.Combine(archivePath,
-                $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss} {Path.GetDirectoryName(savePath)} Auto.zip");
+                $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss} Current.zip");
 
             ZipFile.CreateFromDirectory(savePath, archiveFile);
+        }
+
+        public static void RestoreBackup(string savePath, string backupPath)
+        {
+            Directory.Delete(savePath, true);
+            Directory.CreateDirectory(savePath);
+            ZipFile.ExtractToDirectory(backupPath, savePath);
         }
     }
 }

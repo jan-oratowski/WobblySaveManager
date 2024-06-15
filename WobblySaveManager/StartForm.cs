@@ -20,6 +20,7 @@ namespace WobblySaveManager
                 Close();
             }
             _savePath = savePath!;
+            txtSavePath.Text = _savePath;
             Reload();
 
             lvSaves.Groups.Add(_currentGroup);
@@ -29,7 +30,7 @@ namespace WobblySaveManager
 
         private void btnShow_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", txtSavePath.Text);
+            Process.Start("explorer.exe", _savePath);
         }
 
         private void Reload()
@@ -64,6 +65,7 @@ namespace WobblySaveManager
                 var item = new ListViewItem(backup.Name, _backupsGroup);
                 item.SubItems.Add(backup.LastModified.ToString(CultureInfo.InvariantCulture));
                 item.SubItems.Add("???");
+                item.Tag = backup.Path;
                 lvSaves.Items.Add(item);
             });
         }
@@ -75,6 +77,7 @@ namespace WobblySaveManager
                 var item = new ListViewItem(backup.Name, _archivesGroup);
                 item.SubItems.Add(backup.LastModified.ToString(CultureInfo.InvariantCulture));
                 item.SubItems.Add("???");
+                item.Tag = backup.Path;
                 lvSaves.Items.Add(item);
             });
         }
@@ -85,12 +88,51 @@ namespace WobblySaveManager
             var item = new ListViewItem(current.Name, _currentGroup);
             item.SubItems.Add(current.LastModified.ToString(CultureInfo.InvariantCulture));
             item.SubItems.Add("???");
+            item.Tag = current.Path;
             lvSaves.Items.Add(item);
         }
 
         private void btnReload_Click(object sender, EventArgs e)
         {
             Reload();
+        }
+
+        private void lvSaves_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lvSaves_DoubleClick(object sender, EventArgs e)
+        {
+            if (lvSaves.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            var selectedItem = lvSaves.SelectedItems[0];
+            
+            if (selectedItem.Group == _currentGroup && MessageBox.Show(
+                    "Do you want to archive current save?",
+                    "Archive...",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                var itemPath = selectedItem.Tag as string;
+                Helpers.ArchiveCurrent(itemPath!, _savePath);
+                MessageBox.Show("Current save archived", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Reload();
+            }
+
+            if ((selectedItem.Group == _backupsGroup || selectedItem.Group == _archivesGroup) && MessageBox.Show(
+                    "Do you want to restore this backup? Current save will be overwritten",
+                    "Restore...",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                var itemPath = selectedItem.Tag as string;
+                var currentPath = _currentGroup.Items[0].Tag as string;
+                Helpers.RestoreBackup(currentPath!, itemPath!);
+                MessageBox.Show("Backup restored", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Reload();
+            }
         }
     }
 }

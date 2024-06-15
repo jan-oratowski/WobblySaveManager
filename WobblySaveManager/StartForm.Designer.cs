@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StartForm));
             label1 = new Label();
             txtSavePath = new TextBox();
             btnShow = new Button();
@@ -78,12 +79,15 @@
             // lvSaves
             // 
             lvSaves.Columns.AddRange(new ColumnHeader[] { chName, chDate, chWorlds });
+            lvSaves.FullRowSelect = true;
             lvSaves.Location = new Point(12, 116);
             lvSaves.Name = "lvSaves";
             lvSaves.Size = new Size(448, 322);
             lvSaves.TabIndex = 5;
             lvSaves.UseCompatibleStateImageBehavior = false;
             lvSaves.View = View.Details;
+            lvSaves.SelectedIndexChanged += lvSaves_SelectedIndexChanged;
+            lvSaves.DoubleClick += lvSaves_DoubleClick;
             // 
             // chName
             // 
@@ -121,8 +125,9 @@
             Controls.Add(btnShow);
             Controls.Add(txtSavePath);
             Controls.Add(label1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "StartForm";
-            Text = "Form1";
+            Text = "Wobbly Save Manager";
             ResumeLayout(false);
             PerformLayout();
         }
